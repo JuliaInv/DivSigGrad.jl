@@ -5,16 +5,16 @@ using jInv.Utils
 using Base.Test
 using KrylovMethods
 
-n1    = 32; n2 = 32; n3 = 16;
+n1    = 20; n2 = 18; n3 = 8;
 ns    = 100;
 M     = getRegularMesh([0,1,0,1,0,0.5],[n1,n2,n3])
 
 Q = spzeros(Float64,prod(M.n+1),6)
 cnt = 1
-for i=5:5:30
+for i=5:2:15
 	q     = zeros(n1+1,n2+1,n3+1);
-	q[i,5,end] = 1.0/prod(M.h)
-	q[i,end-5,end] = -1.0/prod(M.h)
+	q[i,2,end] = 1.0/prod(M.h)
+	q[i,end-1,end] = -1.0/prod(M.h)
 	Q[:,cnt] = sparse(q[:])
 	cnt+=1
 end	

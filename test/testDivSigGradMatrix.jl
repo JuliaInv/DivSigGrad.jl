@@ -1,7 +1,7 @@
 using DivSigGrad
 using Base.Test
 
-n1 = 8; n2 = 12; n3 = 14
+n1 = 8; n2 = 12; n3 = 9
 x0    = [0.05, 0.1, 0.2]
 domain = [x0[1], 1.2, x0[2], 1.4, x0[3], 2.6]
 

@@ -6,16 +6,16 @@ using Base.Test
 using KrylovMethods
 
 # construct tensor mesh
-n1 = 30; n2 = 34; n3 = 15;
-h1    = 1+rand(n1)
-h2    = 1+rand(n2)
-h3    = 1+rand(n3)
+n1 = 20; n2 = 18; n3 = 8;
+h1    = 1+.1*rand(n1)
+h2    = 1+.1*rand(n2)
+h3    = 1+.1*rand(n3)
 ns    = 100
 M     = getTensorMesh3D(h1,h2,h3)
 
 Q = spzeros(Float64,prod(M.n+1),6)
 cnt = 1
-for i=5:5:30
+for i=5:5:20
 	q     = zeros(n1+1,n2+1,n3+1);
 	q[i,5,end] = 1.0
 	q[i,end-5,end] = -1.0

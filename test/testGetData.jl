@@ -12,10 +12,10 @@ using Base.Test
 
 # get mesh for conductivity
 ns    = 100;
-Minv  = getRegularMesh([0,1,0,1,0,0.5],[32,32,16])
+Minv  = getRegularMesh([0,1,0,1,0,0.5],[20,20,8])
 
 # get mesh for forward problems
-n1    = 32; n2 = 32; n3 = 16;
+n1    = 20; n2 = 20; n3 = 8;
 Mfor  = getRegularMesh([0,1,0,1,0,0.5],[n1,n2,n3])
 
 # first source
