@@ -1,0 +1,8 @@
+println("==== test getData.jl for rectangular mesh ===")
+include("testGetData.jl")
+println("==== test DivSigGradMatrix for tensor and regular mesh ===")
+include("testDivSigGradMatrix.jl")
+println("==== test DivSigGrad.jl for rectangular mesh ===")
+include("testDivSigGrad.jl")
+println("==== test DivSigGrad.jl for tensor mesh ===")
+include("testDivSigGradTensor.jl")
