@@ -12,7 +12,7 @@ notifications:
   email: false
  
 before_install:
-   - julia  'Pkg.clone("https://github.com/JuliaInv/jInv.jl","jInv"); Pkg.build("jInv");'
+   - julia -e 'Pkg.clone("https://github.com/JuliaInv/jInv.jl","jInv"); Pkg.build("jInv");'
    - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
 
 script:
