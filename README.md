@@ -5,11 +5,13 @@
 Julia Package for Inverse Conducitivy Problems
 
 # Requirements
-This package is an add-on of [`jInv`](https://github.com/JuliaInv/jInv.jl). To accelerate the PDE solves it is also recommended to install [`ParSpMatVec`](https://github.com/lruthotto/ParSpMatVec) when using iterative solvers or [`MUMPS`](https://github.com/JuliaSparse/MUMPS.jl) as a direct solver.
+This package is an add-on for [`jInv`](https://github.com/JuliaInv/jInv.jl), which needs to be installed. 
+
+To accelerate the PDE solves it is also recommended to install [`ParSpMatVec`](https://github.com/lruthotto/ParSpMatVec) when using iterative solvers or [`MUMPS`](https://github.com/JuliaSparse/MUMPS.jl) as a direct solver. If these modules are available, they are used by default.
 
 # Installation
 
-In julia type
+In julia type:
 
 ``` 
 Pkg.clone("https://github.com/JuliaInv/jInv.jl","jInv")
