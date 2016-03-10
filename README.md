@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/JuliaInv/DivSigGrad.jl.svg?branch=master)](https://travis-ci.org/JuliaInv/DivSigGrad.jl)
 [![Coverage Status](https://coveralls.io/repos/github/JuliaInv/DivSigGrad.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaInv/DivSigGrad.jl?branch=master)
+[![Build status](https://ci.appveyor.com/api/projects/status/rkal2ya6u0vd0vl0?svg=true)](https://ci.appveyor.com/project/lruthotto/divsiggrad-jl)
+
 
 # DivSigGrad.jl
 Julia Package for Inverse Conducitivy Problems
