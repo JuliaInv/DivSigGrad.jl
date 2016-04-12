@@ -39,18 +39,27 @@ end
 fields = [0.0] 
 @everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
 Apcg         = getIterativeSolver(PCGsolver)
-Apcg.tol=1e-8
+Apcg.tol=1e-10
 Abpcg      = getBlockPCGsolver()
 Abpcg.out=0
 Abpcg.maxIter = 50000
-Abpcg.tol  = 1e-6
+Abpcg.tol  = 1e-10
 
-Ppcg      = DivSigGradParam(M,Q,P,fields,Apcg)
-Pbpcg     = DivSigGradParam(M,Q,P,fields,Abpcg)
+pFors     = [];
+push!(pFors,DivSigGradParam(M,Q,P,fields,Apcg))
+push!(pFors,DivSigGradParam(M,Q,P,fields,Abpcg))
+
+# different receivers for each source
+Rec = Array{SparseMatrixCSC}(size(Q,2))
+for k=1:size(Q,2)
+	Rec[k] = P
+end
+push!(pFors,DivSigGradParam(M,Q,Rec,fields,Apcg))
+push!(pFors,DivSigGradParam(M,Q,Rec,fields,Abpcg))
 
 if LinearSolvers.hasMUMPS
 	Amumps    = getMUMPSsolver()
-	Pmumps    = DivSigGradParam(M,Q,P,fields,Amumps)
+	push!(pFors,DivSigGradParam(M,Q,P,fields,Amumps))
 end
 
 # Forward problem
@@ -59,68 +68,41 @@ m[round(Int64,n1/3):round(Int64,n1/2),
   round(Int64,n1/3):round(Int64,n1/2),
   end-4:end-2] = 2
 
-(D,Ppcg) = getData(m[:],Ppcg);
-D0, = getData(m[:]*0+1.0,Ppcg);
+(D,pFors[1]) = getData(m[:],pFors[1]);
+D0, = getData(m[:]*0+1.0,pFors[1]);
 
-(Db,Pbpcg) = getData(m[:],Pbpcg);
-Db0, = getData(m[:]*0+1.0,Pbpcg);
-@test norm(D-Db)/norm(D) < 1e-1
-@test norm(D0-Db0)/norm(D0) < 1e-1
-
-if LinearSolvers.hasMUMPS
-	(Dm,Pmumps) = getData(m[:],Pmumps);
-	D0m, = getData(m[:]*0+1.0,Pmumps);
-	@test norm(D-Dm)/norm(D) < 1e-1
-	@test norm(D0-D0m)/norm(D0) < 1e-1
+for k=2:length(pFors)
+	
+	(Db,pFors[k]) = getData(m[:],pFors[k]);
+	Db0, = getData(m[:]*0+1.0,pFors[k]);
+	@test norm(D-Db)/norm(D) < 1e-1
+	@test norm(D0-Db0)/norm(D0) < 1e-1
 end
 
-
 # Derivative check
-println("\t--- derivative for PCG ---")
-dm = randn(size(m))*1e-1
-Jdm = getSensMatVec(dm[:],m[:],Ppcg)
-alpha = 1.0;
-err = zeros(6,2)
-for i=1:size(err,1)
-	(D1,Ppcg) = getData(m[:]+alpha*dm[:],Ppcg);
-   err[i,1] = norm(D1[:]-D[:])
-   err[i,2] = norm(D1[:]-D[:]-alpha*Jdm)
-	@printf "\talpha=%1.2e\t\tE0=%1.2e\t\tE1=%1.2e\n" alpha err[i,1] err[i,2]
-	alpha = alpha/2
-end
-@test length(find(2+diff(log2(err[:,2])).<0.2))>=3
-
-# Derivative check
-if LinearSolvers.hasMUMPS
-	println("\t--- derivative MUMPS ---")
+for k=1:length(pFors)
+	println("\t--- derivative for solver $(typeof(pFors[k].Ainv)) ---")
 	dm = randn(size(m))*1e-1
-	Jdm = getSensMatVec(dm[:],m[:],Pmumps)
+	Jdm = getSensMatVec(dm[:],m[:],pFors[k])
 	alpha = 1.0;
 	err = zeros(6,2)
 	for i=1:size(err,1)
-		D1, = getData(m[:]+alpha*dm[:],Pmumps);
-	   err[i,1] = norm(D1[:]-D[:])
-	   err[i,2] = norm(D1[:]-D[:]-alpha*Jdm)
+		(D1,pFors[k]) = getData(m[:]+alpha*dm[:],pFors[k]);
+   		err[i,1] = norm(D1[:]-D[:])
+   		err[i,2] = norm(D1[:]-D[:]-alpha*Jdm)
 		@printf "\talpha=%1.2e\t\tE0=%1.2e\t\tE1=%1.2e\n" alpha err[i,1] err[i,2]
 		alpha = alpha/2
 	end
-	@test length(find(2+diff(log2(err[:,2])).<0.2))>=2
+	@test length(find(2+diff(log2(err[:,2])).<0.2))>=3
 end
 
-println("\t--- adjoint test PCG ---")
-Jdm = getSensMatVec(dm[:],m[:],Ppcg)
-v         = randn(size(Jdm))
-t1        = dot(v,Jdm)
-JTv       = getSensTMatVec(v[:],m[:],Ppcg)
-t2        = dot(JTv,dm[:])
-@test (abs(t1-t2)/t1<=5e-2)
-
-if LinearSolvers.hasMUMPS
-	println("\t--- adjoint test MUMPS ---")
-	Jdm = getSensMatVec(dm[:],m[:],Pmumps)
+for k=1:length(pFors)
+	println("\t--- adjoint test for solver $(typeof(pFors[k].Ainv)) ---")
+	dm = randn(size(m))*1e-1
+	Jdm = getSensMatVec(dm[:],m[:],pFors[k])
 	v         = randn(size(Jdm))
 	t1        = dot(v,Jdm)
-	JTv       = getSensTMatVec(v[:],m[:],Ppcg)
+	JTv       = getSensTMatVec(v[:],m[:],pFors[k])
 	t2        = dot(JTv,dm[:])
 	@test (abs(t1-t2)/t1<=5e-2)
 end

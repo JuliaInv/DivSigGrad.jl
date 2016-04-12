@@ -8,6 +8,6 @@ function getSensMatVec(x::Vector{Float64},m::Vector{Float64},pFor::DivSigGradPar
     
     Z  = G'*(sdiag(Ae'*x)*(G*pFor.Fields))
     Z, = solveLinearSystem(A,Z,pFor.Ainv)
-    Jv = -pFor.Receivers'*Z
+    Jv = - getLinearMeasurements(pFor.Receivers,Z)
     return vec(Jv)
 end
