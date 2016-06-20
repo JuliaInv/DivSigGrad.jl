@@ -34,7 +34,7 @@ fields = [0.0]
 @everywhere PCGsolver(A,b;M=M,tol=1e-5,maxIter=50,out=-1) = KrylovMethods.cg(A,b;M=M,tol=1e-5,maxIter=50,out=-1)
 Apcg         = getIterativeSolver(PCGsolver)
 Apcg.maxIter=1000
-@everywhere IterMethod(A,B;M=M,tol=1e-5,maxIter=50,out=-1) = KrylovMethods.blockCG(A,B;M=M,tol=1e-5,maxIter=50,out=-1)
+@everywhere IterMethod(A,B;M=M,X=X,tol=1e-5,maxIter=50,out=-1) = KrylovMethods.blockCG(A,B;M=M,X=X,tol=1e-5,maxIter=50,out=-1)
 Abpcg      = getBlockIterativeSolver(IterMethod);
 Abpcg.out=0
 Abpcg.maxIter = 50000
