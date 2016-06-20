@@ -42,7 +42,7 @@ end
 
 fields = [0.0] 
 # Ainv  = getMUMPSsolver()
-@everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
+@everywhere PCGsolver(A,b;M=M,tol=1e-5,maxIter=10,out=-1) = KrylovMethods.cg(A,b;M=M,tol=1e-5,maxIter=10,out=-1)
 Ainv         = getIterativeSolver(PCGsolver)
 
 # distribute forward problems

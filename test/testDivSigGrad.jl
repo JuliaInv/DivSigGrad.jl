@@ -31,10 +31,11 @@ for i=1:n1
 end
 
 fields = [0.0] 
-@everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
+@everywhere PCGsolver(A,b;M=M,tol=1e-5,maxIter=10,out=-1) = KrylovMethods.cg(A,b;M=M,tol=1e-5,maxIter=10,out=-1)
 Apcg         = getIterativeSolver(PCGsolver)
 Apcg.maxIter=1000
-Abpcg      = getBlockPCGsolver()
+@everywhere IterMethod = KrylovMethods.blockCG
+Abpcg      = getBlockIterativeSolver(IterMethod);
 Abpcg.out=0
 Abpcg.maxIter = 50000
 Abpcg.tol  = 1e-6
