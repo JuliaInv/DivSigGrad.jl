@@ -41,9 +41,7 @@ for i=1:n1
 end
 
 fields = [0.0] 
-# Ainv  = getMUMPSsolver()
-@everywhere PCGsolver(A,b;M=M,tol=1e-5,maxIter=10,out=-1) = KrylovMethods.cg(A,b;M=M,tol=1e-5,maxIter=10,out=-1)
-Ainv         = getIterativeSolver(PCGsolver)
+Ainv         = getIterativeSolver(KrylovMethods.cg)
 
 # distribute forward problems
 PF    = Array{RemoteRef{Channel{Any}}}(2)

@@ -40,7 +40,7 @@ fields = [0.0]
 @everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
 Apcg         = getIterativeSolver(PCGsolver)
 Apcg.tol=1e-10
-Abpcg      = getBlockPCGsolver()
+Abpcg      = getBlockIterativeSolver(KrylovMethods.blockCG,tol=1e-5)
 Abpcg.out=0
 Abpcg.maxIter = 50000
 Abpcg.tol  = 1e-10
