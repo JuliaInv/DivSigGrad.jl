@@ -17,14 +17,14 @@ defines one DivSigGrad problem
 Fields:
 
 	Mesh::AbstractMesh
-	Sources::SparseMatrixCSC
+	Sources::Union{SparseMatrixCSC,Array}
 	Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC}}
 	Fields::Array{Float64} 
 	Ainv::AbstractSolver
 """
 type DivSigGradParam <: ForwardProbType
     Mesh::AbstractMesh
-    Sources::SparseMatrixCSC
+    Sources::Union{SparseMatrixCSC,Array}
     Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC}}
     Fields::Array{Float64} 
     Ainv::AbstractSolver
