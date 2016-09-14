@@ -5,10 +5,11 @@ function getSensTMatVec(x::Vector{Float64},m::Vector{Float64},pFor::DivSigGradPa
     A   = getDivSigGradMatrix(m,pFor.Mesh)
     U   = pFor.Fields
     G   = getNodalGradientMatrix(pFor.Mesh)
+	V   = getVolume(pFor.Mesh)
     Ae  = getEdgeAverageMatrix(pFor.Mesh) 
 	rhs = getRHS(pFor.Receivers,pFor.Sources,x)
     Zt,  = solveLinearSystem(A,rhs,pFor.Ainv)  
-    JTv  = - sum(Ae*((G*U).*(G*Zt)),2)
+    JTv  = - sum(V*Ae*((G*U).*(G*Zt)),2)
     return vec(JTv)
 end
 
