@@ -1,13 +1,16 @@
-using jInv.ForwardShare
-using jInv.Mesh
-using DivSigGrad
-using jInv.LinearSolvers
-using KrylovMethods
-
-if nworkers()==1
-	warn("add more workers to test parallel code")
+if nworkers()<2
+	addprocs(2)
 end
-using Base.Test
+
+@everywhere begin
+	using jInv.Mesh
+	using jInv.ForwardShare
+	using jInv.Utils
+	using DivSigGrad
+	using jInv.LinearSolvers
+	using KrylovMethods
+	using Base.Test
+end
 
 # get mesh for conductivity
 ns    = 100;
@@ -40,13 +43,13 @@ for i=1:n1
 	end
 end
 
-fields = [0.0] 
+fields = [0.0]
 Ainv         = getIterativeSolver(KrylovMethods.cg)
 
 # distribute forward problems
-PF    = Array{RemoteRef{Channel{Any}}}(2)
-PF[1] = @spawn DivSigGradParam(Mfor,Q1,P,fields,Ainv)
-PF[2] = @spawn DivSigGradParam(Mfor,Q2,P,fields,Ainv)
+PF    = Array{RemoteChannel}(2)
+PF[1] = initRemoteChannel(DivSigGradParam,workers()[1],Mfor,[Q1 Q2],P,fields,Ainv)
+PF[2] = initRemoteChannel(DivSigGradParam,workers()[2],Mfor,[Q2 Q2],P,fields,Ainv)
 
 # get mesh to mesh interpolation
 M2M    = prepareMesh2Mesh(PF,Minv,false)
@@ -90,17 +93,11 @@ PF1 = DivSigGradParam(Mfor,[Q1 Q2],Ps,[0.0],Ainv)
 Dobs1, = getData(sigloc,PF1)
 
 # Option 2: use two params
-PF2 = Array{RemoteRef{Channel{Any}}}(2)
-PF2[1] = @spawn DivSigGradParam(Mfor,Q1,P1,fields,Ainv)
-PF2[2] = @spawn DivSigGradParam(Mfor,Q2,P2,fields,Ainv)
+PF2 = Array{RemoteChannel}(2)
+PF2[1] = initRemoteChannel(DivSigGradParam, workers()[1], Mfor,Q1,P1,fields,Ainv)
+PF2[2] = initRemoteChannel(DivSigGradParam, workers()[2], Mfor,Q2,P2,fields,Ainv)
 Dobs2, = getData(vec(sig),PF2,M2M)
 
 for k=1:length(Ps)
 	@test_approx_eq Dobs1[:,k] fetch(Dobs2[k])
 end
-
-
-
-
-
-

@@ -1,3 +1,17 @@
+if nworkers()<2
+	addprocs(2)
+end
+
+using jInv.Mesh
+using jInv.ForwardShare
+using jInv.Utils
+using DivSigGrad
+using jInv.LinearSolvers
+using KrylovMethods
+
+using Base.Test
+
+
 println("==== test getData.jl for rectangular mesh ===")
 include("testGetData.jl")
 println("==== test DivSigGradMatrix for tensor and regular mesh ===")
@@ -6,3 +20,7 @@ println("==== test DivSigGrad.jl for rectangular mesh ===")
 include("testDivSigGrad.jl")
 println("==== test DivSigGrad.jl for tensor mesh ===")
 include("testDivSigGradTensor.jl")
+println("==== fictous source test (2D) ===")
+include("testFictuousSource2D.jl")
+println("==== fictous source test (3D) ===")
+include("testFictuousSource3D.jl")

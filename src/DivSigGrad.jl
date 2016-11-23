@@ -11,7 +11,7 @@ import jInv.ForwardShare.ForwardProbType
 
 """
 type DivSigGrad.DivSigGradParam <: ForwardProbType
-	
+
 defines one DivSigGrad problem
 
 Fields:
@@ -19,18 +19,18 @@ Fields:
 	Mesh::AbstractMesh
 	Sources::Union{SparseMatrixCSC,Array}
 	Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC}}
-	Fields::Array{Float64} 
+	Fields::Array{Float64}
 	Ainv::AbstractSolver
 """
 type DivSigGradParam <: ForwardProbType
     Mesh::AbstractMesh
-    Sources::Union{SparseMatrixCSC,Array}
-    Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC}}
-    Fields::Array{Float64} 
+    Sources::Union{SparseMatrixCSC,Array,SparseVector}
+    Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC},SparseVector}
+		Fields::Array{Float64}
     Ainv::AbstractSolver
 end
 
-include("getDivSigGradMatrix.jl")	
+include("getDivSigGradMatrix.jl")
 include("getData.jl")
 include("getSensMatVec.jl")
 include("getSensTMatVec.jl")
