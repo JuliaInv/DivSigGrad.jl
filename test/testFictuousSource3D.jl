@@ -44,7 +44,7 @@ function fictousSourceTest3D(M,u,sig,rhs,expOrder=2.5)
 	#  figure(1); clf()
 	# println(diff(log2(err[:,1])))
 	#  viewOrthoSlices2D(sk,M)
-  @test countnz(diff(log2(err[:,1])).<-expOrder) >= 3
+  @test countnz(diff(log2(err[:,1])).<-expOrder) >= N-2
 end
 
 Mreg = getRegularMesh([0 1 0 1 0 1],[1,1,2])

@@ -17,8 +17,8 @@ for i=5:2:15
 	q[i,end-1,end] = -1.0/prod(M.h)
 	Q[:,cnt] = sparse(q[:])
 	cnt+=1
-end	
-    
+end
+
 P     = spzeros((n1+1)*(n2+1)*(n3+1),(n1)*(n2));
 cnt   = 1
 for i=1:n1
@@ -30,15 +30,15 @@ for i=1:n1
 	end
 end
 
-fields = [0.0] 
-@everywhere PCGsolver(A,b;M=M,tol=1e-5,maxIter=50,out=-1) = KrylovMethods.cg(A,b;M=M,tol=1e-5,maxIter=50,out=-1)
+fields = [0.0]
+@everywhere PCGsolver(A,b;M=M,tol=1e-8,maxIter=1000,out=-1) = KrylovMethods.cg(A,b;M=M,tol=tol,maxIter=maxIter,out=out)
 Apcg         = getIterativeSolver(PCGsolver)
 Apcg.maxIter=1000
-@everywhere IterMethod(A,B;M=M,X=X,tol=1e-5,maxIter=50,out=-1) = KrylovMethods.blockCG(A,B;M=M,X=X,tol=1e-5,maxIter=50,out=-1)
+@everywhere IterMethod(A,B;M=M,X=X,tol=1e-8,maxIter=50000,out=-1) = KrylovMethods.blockCG(A,B;M=M,X=X,tol=tol,maxIter=maxIter,out=out)
 Abpcg      = getBlockIterativeSolver(IterMethod);
 Abpcg.out=0
 Abpcg.maxIter = 50000
-Abpcg.tol  = 1e-6
+Abpcg.tol  = 1e-8
 
 
 Ppcg      = DivSigGradParam(M,Q,P,fields,Apcg)

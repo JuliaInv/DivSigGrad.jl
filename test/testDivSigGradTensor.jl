@@ -1,6 +1,7 @@
 using DivSigGrad
 using jInv.Mesh
 using jInv.LinearSolvers
+using jInv.ForwardShare
 using jInv.Utils
 using Base.Test
 using KrylovMethods
@@ -21,7 +22,7 @@ for i=5:5:20
 	q[i,end-5,end] = -1.0
 	Q[:,cnt] = sparse(q[:])
 	cnt+=1
-end	
+end
 
 P     = spzeros((n1+1)*(n2+1)*(n3+1),(n1)*(n2));
 cnt   = 1
@@ -36,14 +37,14 @@ end
 
 
 
-fields = [0.0] 
+fields = [0.0]
 @everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
 Apcg         = getIterativeSolver(PCGsolver)
 Apcg.tol=1e-10
-Abpcg      = getBlockIterativeSolver(KrylovMethods.blockCG,tol=1e-5)
-Abpcg.out=0
+Abpcg         = getBlockIterativeSolver(KrylovMethods.blockCG,tol=1e-10)
+Abpcg.out     =0
 Abpcg.maxIter = 50000
-Abpcg.tol  = 1e-10
+Abpcg.tol     = 1e-10
 
 pFors     = [];
 push!(pFors,DivSigGradParam(M,Q,P,fields,Apcg))
@@ -72,7 +73,7 @@ m[round(Int64,n1/3):round(Int64,n1/2),
 D0, = getData(m[:]*0+1.0,pFors[1]);
 
 for k=2:length(pFors)
-	
+
 	(Db,pFors[k]) = getData(m[:],pFors[k]);
 	Db0, = getData(m[:]*0+1.0,pFors[k]);
 	@test norm(D-Db)/norm(D) < 1e-1
