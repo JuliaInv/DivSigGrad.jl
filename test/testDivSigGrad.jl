@@ -1,6 +1,7 @@
 using jInv.Mesh
 using DivSigGrad
 using jInv.LinearSolvers
+using jInv.ForwardShare
 using jInv.Utils
 using Base.Test
 using KrylovMethods
@@ -78,7 +79,9 @@ end
 
 # Derivative check
 println("\t--- derivative for PCG ---")
-dm = randn(size(m))*1e-1
+(Jn,Jm) = getSensMatSize(Ppcg)
+dm = randn(Jm)*1e-1
+
 Jdm = getSensMatVec(dm[:],m[:],Ppcg)
 alpha = 1.0;
 err = zeros(6,2)
@@ -92,7 +95,7 @@ end
 @test length(find(2+diff(log2(err[:,2])).<0.1))>=3
 
 println("\t--- derivative for BlockPCG ---")
-dm = randn(size(m))*1e-1
+dm = randn(Jm)*1e-1
 Jdm = getSensMatVec(dm[:],m[:],Pbpcg)
 alpha = 1.0;
 err = zeros(6,2)
@@ -123,8 +126,8 @@ if LinearSolvers.hasMUMPS
 end
 
 println("\t--- adjoint test PCG ---")
-Jdm = getSensMatVec(dm[:],m[:],Ppcg)
-v         = randn(size(Jdm))
+Jdm       = getSensMatVec(dm[:],m[:],Ppcg)
+v         = randn(Jn)
 t1        = dot(v,Jdm)
 JTv       = getSensTMatVec(v[:],m[:],Ppcg)
 t2        = dot(JTv,dm[:])
@@ -132,7 +135,7 @@ t2        = dot(JTv,dm[:])
 
 println("\t--- adjoint test BlockPCG ---")
 Jdm = getSensMatVec(dm[:],m[:],Pbpcg)
-v         = randn(size(Jdm))
+v         = randn(Jn)
 t1        = dot(v,Jdm)
 JTv       = getSensTMatVec(v[:],m[:],Pbpcg)
 t2        = dot(JTv,dm[:])
@@ -141,7 +144,7 @@ t2        = dot(JTv,dm[:])
 if LinearSolvers.hasMUMPS
 	println("\t--- adjoint test MUMPS ---")
 	Jdm        = getSensMatVec(dm[:],m[:],Pmumps)
-	v         = randn(size(Jdm))
+	v         = randn(Jn)
 	t1        = dot(v,Jdm)
 	JTv       = getSensTMatVec(v[:],m[:],Pmumps)
 	t2        = dot(JTv,dm[:])

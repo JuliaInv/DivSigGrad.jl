@@ -4,22 +4,28 @@
 
 
 # DivSigGrad.jl
-Julia Package for Inverse Conducitivy Problems
+
+jInv Extension for solving Inverse Conductivity Problems. It supports various mesh types (regular meshes, stretched tensor meshes, OcTree meshes), different
+PDE solvers (direct and iterative) and allows to easily parallelize inversions when multiple sources are available.
 
 # Requirements
 
-This package is intended to use with julia versions 0.4.x.
+This package is intended to use with julia versions 0.5.x.
 
-This package is an add-on for [`jInv`](https://github.com/JuliaInv/jInv.jl), which needs to be installed. 
+This package is an add-on for [`jInv`](https://github.com/JuliaInv/jInv.jl), which needs to be installed.
 
-To accelerate the PDE solves it is also recommended to install [`ParSpMatVec`](https://github.com/lruthotto/ParSpMatVec) when using iterative solvers or [`MUMPS`](https://github.com/JuliaSparse/MUMPS.jl) as a direct solver. If these modules are available, they are used by default.
+To accelerate the PDE solves, it is also recommended to install [`ParSpMatVec`](https://github.com/lruthotto/ParSpMatVec) when using iterative solvers or [`MUMPS`](https://github.com/JuliaSparse/MUMPS.jl) as a direct solver. If these modules are available, they are used by default.
 
 # Installation
 
-In julia type:
+To use this package, start julia and type:
 
-``` 
+```
 Pkg.clone("https://github.com/JuliaInv/jInv.jl","jInv")
 Pkg.clone("https://github.com/JuliaInv/DivSigGrad.jl","DivSigGrad")
 Pkg.test("DivSigGrad")
 ```
+
+# Examples
+
+A 3D inversion example can be found [`here`](https://github.com/JuliaInv/jInv.jl/blob/master/examples/exDCResistivity.ipynb).
