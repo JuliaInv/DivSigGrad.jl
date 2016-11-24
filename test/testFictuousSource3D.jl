@@ -1,4 +1,4 @@
-using PyPlot
+#using PyPlot
 using jInv.Mesh
 using jInv.Vis
 using DivSigGrad
