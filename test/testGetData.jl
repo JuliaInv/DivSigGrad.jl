@@ -48,9 +48,11 @@ Ainv         = getIterativeSolver(KrylovMethods.cg)
 
 # distribute forward problems
 PF    = Array{RemoteChannel}(2)
-PF[1] = initRemoteChannel(DivSigGradParam,workers()[1],Mfor,[Q1 Q2],P,fields,Ainv)
-PF[2] = initRemoteChannel(DivSigGradParam,workers()[2],Mfor,[Q2 Q2],P,fields,Ainv)
+PF[1] = initRemoteChannel(DivSigGradParam,workers()[1],Mfor,[Q1 Q2],[P P],fields,Ainv)
+PF[2] = initRemoteChannel(DivSigGradParam,workers()[2],Mfor,[Q2 Q2],[P P],fields,Ainv)
 
+@test getNumberOfData(PF[1])==getNumberOfData(PF[2])
+@test getNumberOfData(PF)==2*getNumberOfData(PF[2])
 # get mesh to mesh interpolation
 M2M    = prepareMesh2Mesh(PF,Minv,false)
 m      = rand(prod(Minv.n))

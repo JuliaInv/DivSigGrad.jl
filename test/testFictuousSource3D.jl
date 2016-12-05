@@ -6,45 +6,44 @@ using KrylovMethods
 using Base.Test
 using jInv.Utils
 
-
-
-function fictousSourceTest3D(M,u,sig,rhs,expOrder=2.5)
-	refineMesh(M::RegularMesh)  = (getRegularMesh(M.domain, M.n*2))
+function fictousSourceTest3D(M,u,sig,rhs,expOrder=1.9)
+  refineMesh(M::RegularMesh)  = (getRegularMesh(M.domain, M.n*2))
   refineMesh(M::TensorMesh3D) = (h1=rand(2*M.n[1]);h2=rand(2*M.n[2]);h3=rand(2*M.n[3]); getTensorMesh3D(h1/sum(h1),h2/sum(h2),h3/sum(h3)))
-  N  = 4
+  N  = 5
 
-	err = zeros(N,2)
-  # k=3
+  err = zeros(N,2)
+  @printf "\t----Fictous Source Test DivSigGrad (%s)---\n\tk\tn\t\tl2_err\t\tfactor\tlinf_err\tfactor\n" typeof(M)
   uk = 0.0; sk= 0.0; rk = 0.0;k=1;ut=0
-   for k=1:N
+  for k=1:N
       M  = refineMesh(M)
       xc = getCellCenteredGrid(M)
-  	  xn = getNodalGrid(M)
-
-  		uk = u(xn[:,1],xn[:,2],xn[:,3])
+      xn = getNodalGrid(M)
+      
+      # discretize solution, source, conductivity
+      uk = u(xn[:,1],xn[:,2],xn[:,3])
       sk = sig(xc[:,1],xc[:,2],xc[:,3])
       rk = rhs(xn[:,1],xn[:,2],xn[:,3])
 
+      # build PDE operator
       A  = getDivSigGradMatrix(vec(sk),M)
-  		V  = getVolume(M)
-  		An = getNodalAverageMatrix(M)
-			W  = diagm(vec(sum(An'*V,2)))
-			ut = A\(-W*rk)
+      V  = getVolume(M)
+      An = getNodalAverageMatrix(M)
+      W  = diagm(vec(sum(An'*V,2)))
+      
+      # solve PDE
+      ut  = A\(-W*vec(rk))
+      ut -= mean(ut)
 
-		  ut = ut - mean(ut)
-
-  	res = norm(A*ut + rk,Inf);
-
-      err[k,1] = sqrt(dot(W*(ut-uk),A*(ut-uk)))
+      # compute error
+      err[k,1] = sqrt(dot((ut-uk),A*(ut-uk)))
       err[k,2] = norm(ut-uk,Inf)
 
-      @printf "k=%d, n=[%d,%d,%d], l2_err=%1.3e, factor=%1.3f linf_err=%1.3e\n" k M.n[1] M.n[2] M.n[2] err[k,1] err[max(k-1,1),1]/err[k,1] err[k,2]
+      @printf "\t%d, n=[%-2d,%-2d,%-2d]\t\t%1.3e\t%1.3f\t%1.3e\t%1.3f\n" k M.n[1] M.n[2] M.n[2] err[k,1] err[max(k-1,1),1]/err[k,1] err[k,2] err[max(k-1,1),2]/err[k,2] 
+	  if countnz(diff(log2(err[1:k,1])).<-expOrder) >= N-3
+		break
+	end
    end
-
-	#  figure(1); clf()
-	# println(diff(log2(err[:,1])))
-	#  viewOrthoSlices2D(sk,M)
-  @test countnz(diff(log2(err[:,1])).<-expOrder) >= N-2
+  @test countnz(diff(log2(err[:,1])).<-expOrder) >= N-3
 end
 
 Mreg = getRegularMesh([0 1 0 1 0 1],[1,1,2])

@@ -36,8 +36,8 @@ function getLinearMeasurements(Receivers::Array{SparseMatrixCSC},Fields::Array)
 end
 
 
-function getData(m::Vector{Float64},pFor::DivSigGradParam,doClear::Bool=false)
-	A = getDivSigGradMatrix(m,pFor.Mesh)
+function getData(sig::Vector{Float64},pFor::DivSigGradParam,doClear::Bool=false)
+	A = getDivSigGradMatrix(sig,pFor.Mesh)
 
 	pFor.Ainv.doClear=1
 	pFor.Fields,pFor.Ainv = solveLinearSystem(A,pFor.Sources,pFor.Ainv)

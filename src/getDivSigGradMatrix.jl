@@ -1,21 +1,32 @@
 export getDivSigGradMatrix
 
 
+"""
+function DivSigGrad.getDivSigGradMatrix
+	
+builds finite volume discretization of diffusion operator
 
-function getDivSigGradMatrix(m::Vector{Float64},Mesh::TensorMesh3D)
- 	G       = getNodalGradientMatrix(Mesh)
-	Ae      = getEdgeAverageMatrix(Mesh) 
-	V       = getVolume(Mesh)
-    A       = (G'*sdiag(Ae'*V*vec(m)))*G
- 	A[1,1] += 1/Mesh.h1[1] 
-	return A
-end
+	A = DIV* ( sigma(x) GRAD u(x)),
+	
+where sigma is assumed to be a scalar quantity. Here, we use
+Neuman boundary conditions and fix the value at u(0,0) to obtain
+a regular matrix.
 
-function getDivSigGradMatrix(m::Vector{Float64},Mesh::RegularMesh)
- 	G       = getNodalGradientMatrix(Mesh)
-	Ae      = getEdgeAverageMatrix(Mesh) 
-	V       = getVolume(Mesh)
-    A       = (G'*sdiag(Ae'*V*vec(m)))*G
- 	A[1,1] += 1/Mesh.h[1] 
+Inputs:
+
+	sig::Vector{Float64}  - conductivities (cell-centered)
+	M::AbstractTensorMesh - mesh from jInv.Mesh
+	
+Output:
+	
+	A  - PDE operator (sparse matrix)
+
+"""
+function getDivSigGradMatrix(sig::Vector{Float64},M::AbstractTensorMesh)
+ 	G       = getNodalGradientMatrix(M)
+	Ae      = getEdgeAverageMatrix(M) 
+	V       = getVolume(M)
+    A       = (G'*sdiag(Ae'*(V*vec(sig))))*G
+ 	A[1,1] += 1
 	return A
 end

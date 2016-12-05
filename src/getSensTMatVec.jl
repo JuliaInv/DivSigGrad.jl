@@ -1,8 +1,8 @@
 import jInv.ForwardShare.getSensTMatVec
 
-function getSensTMatVec(x::Vector{Float64},m::Vector{Float64},pFor::DivSigGradParam)
+function getSensTMatVec(x::Vector{Float64},sig::Vector{Float64},pFor::DivSigGradParam)
     
-    A   = getDivSigGradMatrix(m,pFor.Mesh)
+    A   = getDivSigGradMatrix(sig,pFor.Mesh)
     U   = pFor.Fields
     G   = getNodalGradientMatrix(pFor.Mesh)
 	V   = getVolume(pFor.Mesh)
