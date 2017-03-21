@@ -6,7 +6,7 @@ using jInv.LinearSolvers
 using jInv.Utils
 
 
-export DivSigGradParam
+export DivSigGradParam, getDivSigGradParam
 import jInv.ForwardShare.ForwardProbType
 
 """
@@ -20,14 +20,41 @@ Fields:
 	Sources::Union{SparseMatrixCSC,Array}
 	Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC}}
 	Fields::Array{Float64}
+	A::SparseMatrixCSC{Float64}
 	Ainv::AbstractSolver
 """
 type DivSigGradParam <: ForwardProbType
     Mesh::AbstractMesh
     Sources::Union{SparseMatrixCSC,Array,SparseVector}
     Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC},SparseVector}
-		Fields::Array{Float64}
+	Fields::Array{Float64}
+	A::SparseMatrixCSC{Float64}
     Ainv::AbstractSolver
+end
+
+"""
+function getDivSigGradParam
+	
+constructor for DivSigGradParam
+
+Required Inputs
+
+	Mesh::AbstractMesh
+	Sources::Union{SparseMatrixCSC,Array}
+	Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC}}
+
+Optional Inputs (initialized as empty by default)
+
+	Fields::Array{Float64}
+	A::SparseMatrixCSC{Float64}
+	Ainv::AbstractSolver
+	
+"""
+function getDivSigGradParam(Mesh::AbstractMesh, Sources::Union{SparseMatrixCSC,Array,SparseVector},
+	                        Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC},SparseVector};
+							Fields::Array{Float64}=[0.0], A::SparseMatrixCSC{Float64}=spzeros(0,0),			 
+							Ainv::AbstractSolver=getJuliaSolver())
+	return DivSigGradParam(Mesh,Sources,Receivers,Fields,A,Ainv)
 end
 
 import jInv.ForwardShare.getNumberOfData

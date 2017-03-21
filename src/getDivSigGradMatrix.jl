@@ -1,6 +1,7 @@
 export getDivSigGradMatrix
 
 
+
 """
 function DivSigGrad.getDivSigGradMatrix
 	
@@ -29,4 +30,13 @@ function getDivSigGradMatrix(sig::Vector{Float64},M::AbstractTensorMesh)
     A       = (G'*sdiag(Ae'*(V*vec(sig))))*G
  	A[1,1] += 1
 	return A
+end
+
+
+function getDivSigGradMatrix(sig::Vector{Float64},pFor::DivSigGradParam,doClear::Bool=true)
+	if doClear || isempty(pFor.A) || size(pFor.A,1)!=prod(pFor.Mesh.n+1)
+		println("rebuilding")
+		pFor.A = getDivSigGradMatrix(sig,pFor.Mesh)
+	end
+	return pFor.A
 end
