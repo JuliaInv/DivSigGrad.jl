@@ -1,6 +1,5 @@
 #using PyPlot
 using jInv.Mesh
-using jInv.Vis
 using jInv.Utils
 using DivSigGrad
 using KrylovMethods

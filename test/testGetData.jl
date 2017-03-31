@@ -2,15 +2,14 @@ if nworkers()<2
 	addprocs(2)
 end
 
-@everywhere begin
-	using jInv.Mesh
-	using jInv.ForwardShare
-	using jInv.Utils
-	using DivSigGrad
-	using jInv.LinearSolvers
-	using KrylovMethods
-	using Base.Test
-end
+using jInv.Mesh
+using jInv.ForwardShare
+using jInv.Utils
+using DivSigGrad
+using jInv.LinearSolvers
+using KrylovMethods
+using Base.Test
+
 
 # get mesh for conductivity
 ns    = 100;
@@ -48,8 +47,8 @@ Ainv         = getIterativeSolver(KrylovMethods.cg)
 
 # distribute forward problems
 PF    = Array{RemoteChannel}(2)
-PF[1] = initRemoteChannel(DivSigGradParam,workers()[1],Mfor,[Q1 Q2],[P P],fields,Ainv)
-PF[2] = initRemoteChannel(DivSigGradParam,workers()[2],Mfor,[Q2 Q2],[P P],fields,Ainv)
+PF[1] = initRemoteChannel(DivSigGradParam,workers()[1],Mfor,[Q1 Q2],[P P],fields,spzeros(0,0),Ainv)
+PF[2] = initRemoteChannel(DivSigGradParam,workers()[2],Mfor,[Q2 Q2],[P P],fields,spzeros(0,0),Ainv)
 
 @test getNumberOfData(PF[1])==getNumberOfData(PF[2])
 @test getNumberOfData(PF)==2*getNumberOfData(PF[2])
@@ -91,13 +90,13 @@ P2 = P[:,round(Int64,n1*n2/2)+1:end-1] # receivers for second source
 Ps = Array{SparseMatrixCSC}(2)
 Ps[1] = P1
 Ps[2] = P2
-PF1 = DivSigGradParam(Mfor,[Q1 Q2],Ps,[0.0],Ainv)
+PF1 = getDivSigGradParam(Mfor,[Q1 Q2],Ps,Ainv=Ainv)
 Dobs1, = getData(sigloc,PF1)
 
 # Option 2: use two params
 PF2 = Array{RemoteChannel}(2)
-PF2[1] = initRemoteChannel(DivSigGradParam, workers()[1], Mfor,Q1,P1,fields,Ainv)
-PF2[2] = initRemoteChannel(DivSigGradParam, workers()[2], Mfor,Q2,P2,fields,Ainv)
+PF2[1] = initRemoteChannel(DivSigGradParam, workers()[1], Mfor,Q1,P1,fields,spzeros(0,0),Ainv)
+PF2[2] = initRemoteChannel(DivSigGradParam, workers()[2], Mfor,Q2,P2,fields,spzeros(0,0),Ainv)
 Dobs2, = getData(vec(sig),PF2,M2M)
 
 for k=1:length(Ps)

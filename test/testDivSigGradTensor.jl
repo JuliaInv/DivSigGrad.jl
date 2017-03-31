@@ -35,9 +35,6 @@ for i=1:n1
 	end
 end
 
-
-
-fields = [0.0]
 @everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
 Apcg         = getIterativeSolver(PCGsolver)
 Apcg.tol=1e-10
@@ -47,20 +44,20 @@ Abpcg.maxIter = 50000
 Abpcg.tol     = 1e-10
 
 pFors     = [];
-push!(pFors,DivSigGradParam(M,Q,P,fields,Apcg))
-push!(pFors,DivSigGradParam(M,Q,P,fields,Abpcg))
+push!(pFors,getDivSigGradParam(M,Q,P,Ainv=Apcg))
+push!(pFors,getDivSigGradParam(M,Q,P,Ainv=Abpcg))
 
 # different receivers for each source
 Rec = Array{SparseMatrixCSC}(size(Q,2))
 for k=1:size(Q,2)
 	Rec[k] = P
 end
-push!(pFors,DivSigGradParam(M,Q,Rec,fields,Apcg))
-push!(pFors,DivSigGradParam(M,Q,Rec,fields,Abpcg))
+push!(pFors,getDivSigGradParam(M,Q,Rec,Ainv=Apcg))
+push!(pFors,getDivSigGradParam(M,Q,Rec,Ainv=Abpcg))
 
 if LinearSolvers.hasMUMPS
 	Amumps    = getMUMPSsolver()
-	push!(pFors,DivSigGradParam(M,Q,P,fields,Amumps))
+	push!(pFors,getDivSigGradParam(M,Q,P,Ainv=Amumps))
 end
 
 # Forward problem
@@ -83,18 +80,8 @@ end
 # Derivative check
 for k=1:length(pFors)
 	println("\t--- derivative for solver $(typeof(pFors[k].Ainv)) ---")
-	dm = randn(size(m))*1e-1
-	Jdm = getSensMatVec(dm[:],m[:],pFors[k])
-	alpha = 1.0;
-	err = zeros(6,2)
-	for i=1:size(err,1)
-		(D1,pFors[k]) = getData(m[:]+alpha*dm[:],pFors[k]);
-   		err[i,1] = norm(D1[:]-D[:])
-   		err[i,2] = norm(D1[:]-D[:]-alpha*Jdm)
-		@printf "\talpha=%1.2e\t\tE0=%1.2e\t\tE1=%1.2e\n" alpha err[i,1] err[i,2]
-		alpha = alpha/2
-	end
-	@test length(find(2+diff(log2(err[:,2])).<0.2))>=3
+	pass, = checkDerivative(vec(m),pFors[k])
+	@test pass
 end
 
 for k=1:length(pFors)

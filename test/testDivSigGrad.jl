@@ -42,11 +42,11 @@ Abpcg.maxIter = 50000
 Abpcg.tol  = 1e-8
 
 
-Ppcg      = DivSigGradParam(M,Q,P,fields,Apcg)
-Pbpcg     = DivSigGradParam(M,Q,P,fields,Abpcg)
+Ppcg      = getDivSigGradParam(M,Q,P,Ainv=Apcg)
+Pbpcg     = getDivSigGradParam(M,Q,P,Ainv=Abpcg)
 if LinearSolvers.hasMUMPS
 	Amumps    = getMUMPSsolver()
-	Pmumps    = DivSigGradParam(M,Q,P,fields,Amumps)
+	Pmumps    = getDivSigGradParam(M,Q,P,Ainv=Amumps)
 end
 
 # Forward problem
@@ -73,59 +73,25 @@ if LinearSolvers.hasMUMPS
 	@test norm(D0-D0m)/norm(D0m) < 1e-1
 end
 
-
-
-
-
 # Derivative check
 println("\t--- derivative for PCG ---")
 (Jn,Jm) = getSensMatSize(Ppcg)
-dm = randn(Jm)*1e-1
-
-Jdm = getSensMatVec(dm[:],m[:],Ppcg)
-alpha = 1.0;
-err = zeros(6,2)
-for i=1:size(err,1)
-    D1, = getData(m[:]+alpha*dm[:],Ppcg);
-   err[i,1] = norm(D1[:]-D[:])
-   err[i,2] = norm(D1[:]-D[:]-alpha*Jdm)
-	@printf "\talpha=%1.2e\t\tE0=%1.2e\t\tE1=%1.2e\n" alpha err[i,1] err[i,2]
-	alpha = alpha/2
-end
-@test length(find(2+diff(log2(err[:,2])).<0.1))>=3
+pass, = checkDerivative(vec(m),Ppcg)
+@test pass
 
 println("\t--- derivative for BlockPCG ---")
-dm = randn(Jm)*1e-1
-Jdm = getSensMatVec(dm[:],m[:],Pbpcg)
-alpha = 1.0;
-err = zeros(6,2)
-for i=1:size(err,1)
-    D1, = getData(m[:]+alpha*dm[:],Pbpcg);
-   err[i,1] = norm(D1[:]-D[:])
-   err[i,2] = norm(D1[:]-D[:]-alpha*Jdm)
-	@printf "\talpha=%1.2e\t\tE0=%1.2e\t\tE1=%1.2e\n" alpha err[i,1] err[i,2]
-	alpha = alpha/2
-end
-@test length(find(2+diff(log2(err[:,2])).<0.1))>=3
-
+pass, = checkDerivative(vec(m),Pbpcg)
+@test pass
 
 # Derivative check
 if LinearSolvers.hasMUMPS
 	println("\t--- derivative MUMPS ---")
-	Jdm = getSensMatVec(dm[:],m[:],Pmumps)
-	alpha = 1.0;
-	err = zeros(6,2)
-	for i=1:size(err,1)
-		D1, = getData(m[:]+alpha*dm[:],Pmumps);
-	   err[i,1] = norm(D1[:]-D[:])
-	   err[i,2] = norm(D1[:]-D[:]-alpha*Jdm)
-		@printf "\talpha=%1.2e\t\tE0=%1.2e\t\tE1=%1.2e\n" alpha err[i,1] err[i,2]
-		alpha = alpha/2
-	end
-	@test length(find(2+diff(log2(err[:,2])).<0.1))>=3
+	pass, = checkDerivative(vec(m),Pmumps)
+	@test pass
 end
 
 println("\t--- adjoint test PCG ---")
+dm = randn(Jm)*1e-1
 Jdm       = getSensMatVec(dm[:],m[:],Ppcg)
 v         = randn(Jn)
 t1        = dot(v,Jdm)

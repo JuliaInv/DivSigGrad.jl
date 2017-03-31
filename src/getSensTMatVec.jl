@@ -2,14 +2,14 @@ import jInv.ForwardShare.getSensTMatVec
 
 function getSensTMatVec(x::Vector{Float64},sig::Vector{Float64},pFor::DivSigGradParam)
     
-    A   = getDivSigGradMatrix(sig,pFor.Mesh)
+    A   = getDivSigGradMatrix(sig,pFor,false)
     U   = pFor.Fields
     G   = getNodalGradientMatrix(pFor.Mesh)
 	V   = getVolume(pFor.Mesh)
     Ae  = getEdgeAverageMatrix(pFor.Mesh) 
 	rhs = getRHS(pFor.Receivers,pFor.Sources,x)
     Zt,  = solveLinearSystem(A,rhs,pFor.Ainv)  
-    JTv  = - sum(V*Ae*((G*U).*(G*Zt)),2)
+    JTv  = - sum(V*(Ae*((G*U).*(G*Zt))),2)
     return vec(JTv)
 end
 
