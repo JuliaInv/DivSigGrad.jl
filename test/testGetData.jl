@@ -55,7 +55,7 @@ PF[2] = initRemoteChannel(DivSigGradParam,workers()[2],Mfor,[Q2 Q2],[P P],fields
 # get mesh to mesh interpolation
 M2M    = prepareMesh2Mesh(PF,Minv,false)
 m      = rand(prod(Minv.n))
-sig    = exp(m)
+sig    = exp.(m)
 sigloc = fetch(M2M[1])'*vec(sig)
 
 @time begin
@@ -68,8 +68,8 @@ end
 	Dobs1 = fetch(Dobsr[1])
 	Dobs2 = fetch(Dobsr[2])
 end
-@test_approx_eq Dobs1 Dobs1t
-@test_approx_eq Dobs2 Dobs2t
+@test Dobs1 ≈ Dobs1t
+@test Dobs2 ≈ Dobs2t
 
 
 M2M   = prepareMesh2Mesh(PF,Minv,true)
@@ -78,8 +78,8 @@ M2M   = prepareMesh2Mesh(PF,Minv,true)
 	Dobs1 = fetch(Dobsr[1])
 	Dobs2 = fetch(Dobsr[2])
 end
-@test_approx_eq Dobs1 Dobs1t
-@test_approx_eq Dobs2 Dobs2t
+@test Dobs1 ≈ Dobs1t
+@test Dobs2 ≈ Dobs2t
 
 
 # test for different receivers for different sources
@@ -100,5 +100,5 @@ PF2[2] = initRemoteChannel(DivSigGradParam, workers()[2], Mfor,Q2,P2,fields,spze
 Dobs2, = getData(vec(sig),PF2,M2M)
 
 for k=1:length(Ps)
-	@test_approx_eq Dobs1[:,k] fetch(Dobs2[k])
+	@test Dobs1[:,k] ≈ fetch(Dobs2[k])
 end
