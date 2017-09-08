@@ -10,7 +10,7 @@ PDE solvers (direct and iterative) and allows to easily parallelize inversions w
 
 # Requirements
 
-This package is intended to use with julia versions 0.5.x.
+This package is intended to use with julia versions 0.6.x.
 
 This package is an add-on for [`jInv`](https://github.com/JuliaInv/jInv.jl), which needs to be installed.
 
