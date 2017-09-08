@@ -14,9 +14,10 @@ h3    = 1+.1*rand(n3)
 ns    = 100
 M     = getTensorMesh3D(h1,h2,h3)
 
-Q = spzeros(Float64,prod(M.n+1),6)
+srci  =5:5:20; 
+Q = spzeros(Float64,prod(M.n+1),length(srci))
 cnt = 1
-for i=5:5:20
+for i=srci
 	q     = zeros(n1+1,n2+1,n3+1);
 	q[i,5,end] = 1.0
 	q[i,end-5,end] = -1.0
@@ -35,8 +36,8 @@ for i=1:n1
 	end
 end
 
-@everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
-Apcg         = getIterativeSolver(PCGsolver)
+# @everywhere PCGsolver(A,b,M;kwargs...) = cg(A,b,M=M;kwargs...)
+Apcg         = getIterativeSolver(cg)
 Apcg.tol=1e-10
 Abpcg         = getBlockIterativeSolver(KrylovMethods.blockCG,tol=1e-10)
 Abpcg.out     =0
@@ -70,6 +71,7 @@ m[round(Int64,n1/3):round(Int64,n1/2),
 D0, = getData(m[:]*0+1.0,pFors[1]);
 
 for k=2:length(pFors)
+	println("\t--- getData for solver $(typeof(pFors[k].Ainv)) ---")
 
 	(Db,pFors[k]) = getData(m[:],pFors[k]);
 	Db0, = getData(m[:]*0+1.0,pFors[k]);
