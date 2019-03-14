@@ -18,15 +18,24 @@ using jInv.LinearSolvers
 using KrylovMethods
 
 
-println("==== test getData.jl for rectangular mesh ===")
-include("testGetData.jl")
-println("==== test DivSigGradMatrix for tensor and regular mesh ===")
-include("testDivSigGradMatrix.jl")
-println("==== test DivSigGrad.jl for rectangular mesh ===")
-include("testDivSigGrad.jl")
-println("==== test DivSigGrad.jl for tensor mesh ===")
-include("testDivSigGradTensor.jl")
-println("==== fictous source test (2D) ===")
-include("testFictuousSource2D.jl")
-println("==== fictous source test (3D) ===")
-include("testFictuousSource3D.jl")
+
+@testset "DivSigGrad" begin
+@testset "getData" begin
+	include("testGetData.jl")
+end
+@testset "DivSigGradMatrix" begin
+	include("testDivSigGradMatrix.jl")
+end
+@testset "rectangular" begin
+	include("testDivSigGrad.jl")
+end
+@testset "tensor" begin
+	include("testDivSigGradTensor.jl")
+end
+@testset "fictous source (2D)" begin
+	include("testFictuousSource2D.jl")
+end
+@testset "fictous source (3D)" begin
+	include("testFictuousSource3D.jl")
+end
+end
