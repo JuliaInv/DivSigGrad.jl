@@ -3,7 +3,7 @@ using jInv.Mesh
 using jInv.Utils
 using DivSigGrad
 using KrylovMethods
-using Base.Test
+using Test
 
 
 #
@@ -26,25 +26,25 @@ function fictousSourceTest2D(u,sig,rhs)
 
       A  = getDivSigGradMatrix(vec(sk),M)
       V  = getVolume(M)
-      v  = diag(V)
+      v  = Vector(diag(V))
       An = getNodalAverageMatrix(M)
-      ut = A\( sdiag(An'*v)*vec(-rk))
-      ut -= mean(ut)
+      ut = A\( (An'*v).*vec(-rk))
+      ut .-= mean(ut)
 
       err[k,1] = sqrt(dot((ut-uk),A*(ut-uk)))
       err[k,2] = norm(ut-uk,Inf)
 
       @printf "%d\t[%-3d,%-3d]\t%1.3e\t%1.3f\t%1.3e\t%1.3f\n" k M.n[1] M.n[2] err[k,1] err[max(k-1,1),1]/err[k,1] err[k,2] err[max(k-1,1),2]/err[k,2]
    end
-  @test countnz(diff(log2.(err[:,1])).<-1.8) > 4
+  @test count(!iszero,diff(log2.(err[:,1])).<-1.8) > 4
 end
 
 # Constant sigma
 fictousSourceTest2D((x,y)->cos.(pi*x).*cos.(pi*y), (x,y) -> ones(size(x)),
-      (x,y) -> (- pi.^2.*cos.(pi*x).*cos.(pi*y) - pi.^2.*cos.(pi*x).*cos.(pi*y)))
+      (x,y) -> (- pi.^2 .* cos.(pi*x).*cos.(pi*y) - pi.^2 .* cos.(pi*x).*cos.(pi*y)))
 
 # # VARYING SIGMA TEST
-fictousSourceTest2D((x,y)->cos.(pi*x).*cos.(pi*y), (x,y) -> x.^2 + y.^2 + 1,
-      (x,y) -> (- 2*pi^2*cos.(pi*x).*cos.(pi*y).*(x.^2 + y.^2 + 1) - 2*pi*x.*cos.(pi*y).*sin.(pi*x) - 2*pi.*y.*cos.(pi*x).*sin.(pi*y)))
+fictousSourceTest2D((x,y)->cos.(pi*x).*cos.(pi*y), (x,y) -> x.^2 + y.^2 .+ 1,
+      (x,y) -> (- 2*pi^2*cos.(pi*x).*cos.(pi*y).*(x.^2 + y.^2 .+ 1) - 2*pi*x.*cos.(pi*y).*sin.(pi*x) - 2*pi.*y.*cos.(pi*x).*sin.(pi*y)))
 
 println("\t== passed ! ==")

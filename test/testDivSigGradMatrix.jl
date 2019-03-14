@@ -1,5 +1,5 @@
 using DivSigGrad
-using Base.Test
+using Test
 
 n1 = 8; n2 = 12; n3 = 9
 x0    = [0.05, 0.1, 0.2]

@@ -2,7 +2,7 @@
 using jInv.Mesh
 using DivSigGrad
 using KrylovMethods
-using Base.Test
+using Test
 using jInv.Utils
 
 function fictousSourceTest3D(M,u,sig,rhs,expOrder=1.9)
@@ -27,37 +27,59 @@ function fictousSourceTest3D(M,u,sig,rhs,expOrder=1.9)
       A  = getDivSigGradMatrix(vec(sk),M)
       V  = getVolume(M)
       An = getNodalAverageMatrix(M)
-      W  = diagm(vec(sum(An'*V,2)))
+      W  = diagm(0 => vec(sum(An'*V,dims=2)))
       
       # solve PDE
       ut  = A\(-W*vec(rk))
-      ut -= mean(ut)
+      ut .-= mean(ut)
 
       # compute error
       err[k,1] = sqrt(dot((ut-uk),A*(ut-uk)))
       err[k,2] = norm(ut-uk,Inf)
 
       @printf "\t%d, n=[%-2d,%-2d,%-2d]\t\t%1.3e\t%1.3f\t%1.3e\t%1.3f\n" k M.n[1] M.n[2] M.n[2] err[k,1] err[max(k-1,1),1]/err[k,1] err[k,2] err[max(k-1,1),2]/err[k,2] 
-	  if countnz(diff(log2.(err[1:k,1])).<-expOrder) >= N-3
+	  if count(!iszero,diff(log2.(err[1:k,1])).<-expOrder) >= N-3
 		break
 	end
    end
-  @test countnz(diff(log2.(err[:,1])).<-expOrder) >= N-3
+  @test count(!iszero,diff(log2.(err[:,1])).<-expOrder) >= N-3
 end
 
 Mreg = getRegularMesh([0 1 0 1 0 1],[1,1,2])
 h = rand(1); h /=sum(h)
 Mten = getTensorMesh3D(h,h,h)
 fictousSourceTest3D(Mreg,
-										(x,y,z)-> cos.(pi*x).*cos.(3*pi*y).*cos.(2*pi*z),
-										(x,y,z)-> tanh.(10*exp.(- 20*(x - 1/2).^2 - 50*(y - 1/2).^2 - 40*(z - 1/2).^2)) + 1,
-										(x,y,z)-> (- 14.*pi.^2.*cos.(pi.*x).*cos.(3.*pi.*y).*cos.(2.*pi.*z).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)) + 1) - 10.*pi.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2).*cos.(3.*pi.*y).*cos.(2.*pi.*z).*sin.(pi.*x).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)).^2 - 1).*(40.*x - 20) - 30.*pi.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2).*cos.(pi.*x).*cos.(2.*pi.*z).*sin.(3.*pi.*y).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)).^2 - 1).*(100.*y - 50) - 20.*pi.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2).*cos.(pi.*x).*cos.(3.*pi.*y).*sin.(2.*pi.*z).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)).^2 - 1).*(80.*z - 40)))
+							(x,y,z)-> cos.(pi*x) .* cos.(3*pi*y) .* cos.(2*pi*z),
+							(x,y,z)-> tanh.(10*exp.(- 20*(x .- 1/2).^2 - 50*(y .- 1/2).^2 - 40*(z .- 1/2).^2)) .+ 1,
+							(x,y,z)-> (- 14 .* pi.^2 .* cos.(pi .* x) .* cos.(3 .* pi .* y) .* cos.(2 .* pi .* z) .* 
+							             (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 40 .* 
+										 (z .- 1/2).^2)) .+ 1) - 10 .* pi .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* 
+										 (y .- 1/2).^2 - 40 .* (z .- 1/2).^2) .* cos.(3 .* pi .* y) .* cos.(2 .* pi .* z) .*
+										  sin.(pi .* x) .* (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 -
+										   40 .* (z .- 1/2).^2)).^2 .- 1) .* (40 .* x .- 20) - 30 .* pi .* 
+										   exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 40 .* (z .- 1/2).^2) .* 
+										   cos.(pi .* x) .* cos.(2 .* pi .* z) .* sin.(3 .* pi .* y) .*
+										    (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 40 .* 
+											(z .- 1/2).^2)).^2 .- 1) .* (100 .* y .- 50) - 20 .* pi .* exp.(- 20 .* (x .- 1/2).^2 - 
+											50 .* (y .- 1/2).^2 - 40 .* (z .- 1/2).^2) .* cos.(pi .* x) .* cos.(3 .* pi .* y) .* 
+											sin.(2 .* pi .* z) .* (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 
+											40 .* (z .- 1/2).^2)).^2 .- 1) .* (80 .* z .- 40)))
 
 #
 fictousSourceTest3D(Mten,
- 									(x,y,z)-> cos.(pi*x).*cos.(3*pi*y).*cos.(2*pi*z),
- 									(x,y,z)-> tanh.(10*exp.(- 20*(x - 1/2).^2 - 50*(y - 1/2).^2 - 40*(z - 1/2).^2)) + 1,
- 									(x,y,z)-> (- 14.*pi.^2.*cos.(pi.*x).*cos.(3.*pi.*y).*cos.(2.*pi.*z).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)) + 1) - 10.*pi.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2).*cos.(3.*pi.*y).*cos.(2.*pi.*z).*sin.(pi.*x).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)).^2 - 1).*(40.*x - 20) - 30.*pi.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2).*cos.(pi.*x).*cos.(2.*pi.*z).*sin.(3.*pi.*y).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)).^2 - 1).*(100.*y - 50) - 20.*pi.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2).*cos.(pi.*x).*cos.(3.*pi.*y).*sin.(2.*pi.*z).*(tanh.(10.*exp.(- 20.*(x - 1/2).^2 - 50.*(y - 1/2).^2 - 40.*(z - 1/2).^2)).^2 - 1).*(80.*z - 40)),
-									1.5)
+ 									(x,y,z)-> cos.(pi*x) .* cos.(3*pi*y) .* cos.(2*pi*z),
+ 									(x,y,z)-> tanh.(10*exp.(- 20*(x .- 1/2).^2 - 50*(y .- 1/2).^2 - 40*(z .- 1/2).^2)) .+ 1,
+ 									(x,y,z)-> (- 14 .* pi.^2 .* cos.(pi .* x) .* cos.(3 .* pi .* y) .* cos.(2 .* pi .* z) .*
+									           (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 40 .* 
+											   (z .- 1/2).^2)) .+ 1) - 10 .* pi .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* 
+											   (y .- 1/2).^2 - 40 .* (z .- 1/2).^2) .* cos.(3 .* pi .* y) .* cos.(2 .* pi .* z) .* 
+											   sin.(pi .* x) .* (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 40 .* 
+											   (z .- 1/2).^2)).^2 .- 1) .* (40 .* x .- 20) - 30 .* pi .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* 
+											   (y .- 1/2).^2 - 40 .* (z .- 1/2).^2) .* cos.(pi .* x) .* cos.(2 .* pi .* z) .* 
+											   sin.(3 .* pi .* y) .* (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 
+											   40 .* (z .- 1/2).^2)).^2 .- 1) .* (100 .* y .- 50) - 20 .* pi .* exp.(- 20 .* (x .- 1/2).^2 -
+											   50 .* (y .- 1/2).^2 - 40 .* (z .- 1/2).^2) .* cos.(pi .* x) .* cos.(3 .* pi .* y) .* 
+											   sin.(2 .* pi .* z) .* (tanh.(10 .* exp.(- 20 .* (x .- 1/2).^2 - 50 .* (y .- 1/2).^2 - 40 .* 
+											   (z .- 1/2).^2)).^2 .- 1) .* (80 .* z .- 40)), 1.5)
 
 println("\t== passed ! ==")

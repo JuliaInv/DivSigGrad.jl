@@ -9,7 +9,7 @@ function getSensTMatVec(x::Vector{Float64},sig::Vector{Float64},pFor::DivSigGrad
     Ae  = getEdgeAverageMatrix(pFor.Mesh) 
 	rhs = getRHS(pFor.Receivers,pFor.Sources,x)
     Zt,  = solveLinearSystem(A,rhs,pFor.Ainv)  
-    JTv  = - sum(V*(Ae*((G*U).*(G*Zt))),2)
+    JTv  = - sum(V*(Ae*((G*U).*(G*Zt))),dims=2)
     return vec(JTv)
 end
 

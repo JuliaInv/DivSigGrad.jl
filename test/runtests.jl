@@ -1,3 +1,11 @@
+
+using Test
+using LinearAlgebra
+using Distributed
+using Printf
+using Statistics
+
+
 if nworkers()<2
 	addprocs(2)
 end
@@ -8,8 +16,6 @@ using jInv.Utils
 using DivSigGrad
 using jInv.LinearSolvers
 using KrylovMethods
-
-using Base.Test
 
 
 println("==== test getData.jl for rectangular mesh ===")

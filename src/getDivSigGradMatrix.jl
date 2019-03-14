@@ -34,7 +34,7 @@ end
 
 
 function getDivSigGradMatrix(sig::Vector{Float64},pFor::DivSigGradParam,doClear::Bool=true)
-	if doClear || isempty(pFor.A) || size(pFor.A,1)!=prod(pFor.Mesh.n+1)
+	if doClear || isempty(pFor.A) || size(pFor.A,1)!=prod(pFor.Mesh.n .+ 1)
 		pFor.A = getDivSigGradMatrix(sig,pFor.Mesh)
 	end
 	return pFor.A

@@ -1,9 +1,15 @@
 module DivSigGrad
 export getDivSigGradMatrix,DivSigGradParam, getData, getSensMatVec, getSensTMatVec
 
+using LinearAlgebra
+using SparseArrays
+using Printf
+using Distributed
+
 using jInv.Mesh
 using jInv.LinearSolvers
 using jInv.Utils
+
 
 
 export DivSigGradParam, getDivSigGradParam
