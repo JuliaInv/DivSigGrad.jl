@@ -29,7 +29,7 @@ Fields:
 	A::SparseMatrixCSC{Float64}
 	Ainv::AbstractSolver
 """
-type DivSigGradParam <: ForwardProbType
+mutable struct DivSigGradParam <: ForwardProbType
     Mesh::AbstractMesh
     Sources::Union{SparseMatrixCSC,Array,SparseVector}
     Receivers::Union{SparseMatrixCSC,Array{SparseMatrixCSC},SparseVector}
