@@ -2,19 +2,22 @@
 [![Coverage Status](https://coveralls.io/repos/github/JuliaInv/DivSigGrad.jl/badge.svg?branch=master)](https://coveralls.io/github/JuliaInv/DivSigGrad.jl?branch=master)
 [![Build status](https://ci.appveyor.com/api/projects/status/rkal2ya6u0vd0vl0?svg=true)](https://ci.appveyor.com/project/lruthotto/divsiggrad-jl)
 
-
 # DivSigGrad.jl
+
+
 
 jInv Extension for solving Inverse Conductivity Problems. It supports various mesh types (regular meshes, stretched tensor meshes, OcTree meshes), different
 PDE solvers (direct and iterative) and allows to easily parallelize inversions when multiple sources are available.
 
 # Requirements
 
-This package is intended to use with julia versions 0.6.x.
+This package is intended to use with julia versions 1.0.x.
 
 This package is an add-on for [`jInv`](https://github.com/JuliaInv/jInv.jl), which needs to be installed.
 
-To accelerate the PDE solves, it is also recommended to install [`ParSpMatVec`](https://github.com/lruthotto/ParSpMatVec) when using iterative solvers or [`MUMPS`](https://github.com/JuliaSparse/MUMPS.jl) as a direct solver. If these modules are available, they are used by default.
+To accelerate the PDE solves, it is also recommended to install [`ParSpMatVec`](https://github.com/lruthotto/ParSpMatVec) when using iterative solvers.If this module is available, it is used by default.
+
+The package [`MUMPSjInv`](https://github.com/JuliaInv/MUMPSjInv.jl) can be used to add MUMPS as a direct solver. 
 
 # Installation
 
