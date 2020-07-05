@@ -60,10 +60,10 @@ end
 push!(pFors,getDivSigGradParam(M,Q,Rec,Ainv=Apcg))
 push!(pFors,getDivSigGradParam(M,Q,Rec,Ainv=Abpcg))
 
-if LinearSolvers.hasMUMPS
-	Amumps    = getMUMPSsolver()
-	push!(pFors,getDivSigGradParam(M,Q,P,Ainv=Amumps))
-end
+
+Ajulia    = getJuliaSolver()
+push!(pFors,getDivSigGradParam(M,Q,P,Ainv=Ajulia))
+
 
 # Forward problem
 m = ones(n1,n2,n3);

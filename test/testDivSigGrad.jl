@@ -47,10 +47,10 @@ Abpcg.tol  = 1e-8
 
 Ppcg      = getDivSigGradParam(M,Q,P,Ainv=Apcg)
 Pbpcg     = getDivSigGradParam(M,Q,P,Ainv=Abpcg)
-if LinearSolvers.hasMUMPS
-	Amumps    = getMUMPSsolver()
-	Pmumps    = getDivSigGradParam(M,Q,P,Ainv=Amumps)
-end
+
+Ajulia    = getJuliaSolver()
+Pjulia    = getDivSigGradParam(M,Q,P,Ainv=Ajulia)
+
 
 # Forward problem
 m = ones(n1,n2,n3);
@@ -68,13 +68,13 @@ Db0, = getData(m[:]*0 .+ 1.0,Pbpcg);
 @test norm(D-Db)/norm(D) < 1e-1
 @test norm(D0-Db0)/norm(D0) < 1e-1
 
-if LinearSolvers.hasMUMPS
-	println("use MUMPS")
-	@time (Dm,Pmumps) = getData(m[:],Pmumps);
-	D0m, = getData(m[:]*0 .+ 1.0,Pmumps);
-	@test norm(D-Dm)/norm(Dm) < 1e-1
-	@test norm(D0-D0m)/norm(D0m) < 1e-1
-end
+
+println("use Julia Solver")
+@time (Dm,Pjulia) = getData(m[:],Pjulia);
+D0m, = getData(m[:]*0 .+ 1.0,Pjulia);
+@test norm(D-Dm)/norm(Dm) < 1e-1
+@test norm(D0-D0m)/norm(D0m) < 1e-1
+
 
 # Derivative check
 println("\t--- derivative for PCG ---")
@@ -87,11 +87,11 @@ pass, = checkDerivative(vec(m),Pbpcg)
 @test pass
 
 # Derivative check
-if LinearSolvers.hasMUMPS
-	println("\t--- derivative MUMPS ---")
-	pass, = checkDerivative(vec(m),Pmumps)
-	@test pass
-end
+
+println("\t--- derivative Julia Solver ---")
+pass, = checkDerivative(vec(m),Pjulia)
+@test pass
+
 
 println("\t--- adjoint test PCG ---")
 dm = randn(Jm)*1e-1
@@ -110,12 +110,11 @@ JTv       = getSensTMatVec(v[:],m[:],Pbpcg)
 t2        = dot(JTv,dm[:])
 @test (abs(t1-t2)/t1<=5e-2)
 
-if LinearSolvers.hasMUMPS
-	println("\t--- adjoint test MUMPS ---")
-	Jdm        = getSensMatVec(dm[:],m[:],Pmumps)
-	v         = randn(Jn)
-	t1        = dot(v,Jdm)
-	JTv       = getSensTMatVec(v[:],m[:],Pmumps)
-	t2        = dot(JTv,dm[:])
-	@test (abs(t1-t2)/t1<=5e-2)
-end
+
+println("\t--- adjoint test Julia Solver ---")
+Jdm        = getSensMatVec(dm[:],m[:],Pjulia)
+v         = randn(Jn)
+t1        = dot(v,Jdm)
+JTv       = getSensTMatVec(v[:],m[:],Pjulia)
+t2        = dot(JTv,dm[:])
+@test (abs(t1-t2)/t1<=5e-2)
